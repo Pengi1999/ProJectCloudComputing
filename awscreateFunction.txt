@@ -1,0 +1,1 @@
+aws lambda create-function --function-name  CreateTableAddRecordsAndRead --runtime python3.8--zip-file fileb://app.zip --handler app.handler --role arn:aws:iam::535336081846:role/lambda-vpc-role --vpc-config SubnetIds=subnet-0719a28d689997c9c,subnet-0c5bccc2b57c0ca99,SecurityGroupIds=sg-0f2e9dbbf60db6ec3
