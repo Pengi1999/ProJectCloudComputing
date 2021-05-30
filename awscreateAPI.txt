@@ -1,0 +1,47 @@
+import pymysql
+import json
+
+ENDPOINT = "testdb.ciowfjjxk4wm.ap-southeast-1.rds.amazonaws.com"
+USER = "admin"
+PASSWORD = "asdfasdfasdfasdf"
+DB = "test"
+TABLE = "vl"
+
+def lambda_handler(event, context):
+  connection = pymysql.connect(host=ENDPOINT, user=USER, password=PASSWORD, database=DB)
+  type = event['requestContext']['httpMethod']
+  with connection:
+    if type == 'GET':
+      with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM vl")
+        rows = cursor.fetchall()
+        content = json.dumps(dict(rows))
+    elif type == 'POST':
+      body = json.loads(event['body'])
+      with connection.cursor() as cursor:
+        cursor.execute(f"INSERT INTO {TABLE} values ({body['id']}, '{body['name']}');")
+        cursor.execute("SELECT * FROM vl")
+        rows = cursor.fetchall()
+        content = json.dumps(dict(rows))
+        # content = json.dumps(body)
+    elif type == 'PUT':
+      body = json.loads(event['body'])
+      with connection.cursor() as cursor:
+        cursor.execute(f"UPDATE {TABLE} set tenvl='{body['name']}' where id={body['id']};")
+        cursor.execute(f"SELECT * FROM vl where id={body['id']}")
+        rows = cursor.fetchall()
+        content = json.dumps(dict(rows))
+    elif type == 'DELETE':
+      body = json.loads(event['body'])
+      with connection.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM vl where id={body['id']}")
+        rows = cursor.fetchall()
+        cursor.execute(f"DELETE FROM {TABLE} WHERE id={body['id']};")
+        content = json.dumps(dict(rows))
+    else:
+      content = "not implement"
+    connection.commit()
+  return {
+    "statusCode": 200,
+    "body": content
+  }
